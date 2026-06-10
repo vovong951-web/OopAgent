@@ -1,0 +1,8 @@
+# ninja log v7
+3	763	8027823762376839	CMakeFiles/agent.dir/src/main.cpp.obj	6fd4ae582a949fda
+768	1033	8027823770026733	agent.exe	9487ac6832517620
+38	534	8027828533998023	build.ninja	44cc099ba8f90c7e
+38	534	8027828533998023	C:/Users/dell/OopAgent/build/cmake_install.cmake	44cc099ba8f90c7e
+26	987	8027828534958000	CMakeFiles/agent.dir/src/main.cpp.obj	6fd4ae582a949fda
+31	4200	8027828534998211	CMakeFiles/agent.dir/src/client/ollama_client.cpp.obj	b8a1571a96f52beb
+4203	4485	8027828576728216	agent.exe	81efb5caf77e8aca
