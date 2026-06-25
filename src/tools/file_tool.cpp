@@ -7,7 +7,7 @@ std::optional<std::string> FileTool::execute(const std::string& args) {
     // Tách lệnh đầu tiên (read, write, append, exists)
     size_t colon = args.find(':');
     if (colon == std::string::npos) return std::nullopt;
-
+    // std::string::npos có nghĩa là ko tìm tháy 
     std::string cmd = args.substr(0, colon);
     std::string rest = args.substr(colon + 1);
 
@@ -16,11 +16,13 @@ std::optional<std::string> FileTool::execute(const std::string& args) {
         if (!file.is_open()) return std::nullopt;
         std::stringstream ss;
         ss << file.rdbuf();
+        // đọc toàn bộ dữ liệu còn lại từ buffer đó vào stringstream. 
         return ss.str();
-    }
+    }  
 
     if (cmd == "exists") {
         bool ok = std::filesystem::exists(rest);
+        // hàm xét sự tồn tại
         return ok ? std::string("true") : std::string("false");
     }
 
@@ -43,6 +45,7 @@ std::optional<std::string> FileTool::execute(const std::string& args) {
         std::string path = rest.substr(0, sep);
         std::string content = rest.substr(sep + 1);
         std::ofstream file(path, std::ios::app);
+        //  std::ios::app : Con trỏ ghi luôn nhảy tới cuối file không mất nội dung trước.
         if (!file.is_open()) return std::nullopt;
         file << content;
         return std::string("OK");

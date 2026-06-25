@@ -6,9 +6,23 @@
 #include <functional>
 #include <vector>
 
-class ToolRegistry {
+class ToolRegistry { // đăng ký tool động  và lấy tool theo tên
 public:
     // Đăng ký tool với factory function
+    /* std::unique_ptr<Tool> là con trỏ thông minh,
+     sở hữu độc quyền một object kiểu Tool (hoặc class con của Tool),
+     tự động delete khi ra khỏi scope
+     std::function là một "hộp chứa hàm" — nó có thể giữ bất kỳ thứ gì gọi được như hàm
+     (function pointer, lambda, functor), miễn là khớp đúng signature 
+     (kiểu tham số + kiểu trả về) khai báo trong <...>.
+     Cú pháp bên trong <...> luôn viết theo dạng: KieuTraVe(KieuThamSo1, KieuThamSo2, ...).
+     Ví dụ std::function<int(double, double)> nghĩa là "một hàm nhận 2 tham số double, trả về int". 
+    tạo tool: 
+     registry.registerTool("calculator", []() { 
+    return std::make_unique<CalculatorTool>(); 
+});
+với mục đích là tiết kiệm tài nguyên, khi dùng mới tạo
+     */
     void registerTool(const std::string& name, std::function<std::unique_ptr<Tool>()> factory);
 
     // Lấy tool theo tên, trả về nullptr nếu không có hoặc bị deny
@@ -25,5 +39,7 @@ public:
 
 private:
     std::unordered_map<std::string, std::function<std::unique_ptr<Tool>()>> m_factories;
+    // gọi tên thì cho ra hàm lambda
     std::vector<std::string> m_denyList;
+    // danh sách chặn
 };

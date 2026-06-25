@@ -4,7 +4,7 @@
 void ToolRegistry::registerTool(const std::string& name, std::function<std::unique_ptr<Tool>()> factory) {
     m_factories[name] = factory;
 }
-
+//thêm lamda vào map đã tạo bên private
 std::unique_ptr<Tool> ToolRegistry::getTool(const std::string& name) {
     // Kiểm tra xem tool có bị deny không
     if (std::find(m_denyList.begin(), m_denyList.end(), name) != m_denyList.end()) {
@@ -19,11 +19,12 @@ std::unique_ptr<Tool> ToolRegistry::getTool(const std::string& name) {
 
     // Gọi factory để tạo tool instance
     return it->second();
+    // it trả về con trỏ 
 }
 
 std::vector<std::string> ToolRegistry::listTools() const {
     std::vector<std::string> names;
-    for (const auto& [name, factory] : m_factories) {
+    for (const auto& [name, factory] : m_factories) {  // cách dùng c+ 17
         names.push_back(name);
     }
     return names;

@@ -10,9 +10,10 @@ double CalculatorTool::parseNumber(const std::string& expr, size_t& pos) {
     skipSpaces(expr, pos);
     size_t start = pos;
     if (pos < expr.size() && expr[pos] == '-') pos++;
-    while (pos < expr.size() && (std::isdigit(expr[pos]) || expr[pos] == '.')) pos++;
+    while (pos < expr.size() && (std::isdigit(expr[pos]) || expr[pos] == '.')) pos++;//khoảng trắng là dừng
     if (pos == start) throw std::runtime_error("Không tìm thấy số tại vị trí " + std::to_string(pos));
     return std::stod(expr.substr(start, pos - start));
+    // nếu có .. thì báo lỗi do ko chuyển sang double dc 
 }
 
 double CalculatorTool::parseFactor(const std::string& expr, size_t& pos) {
