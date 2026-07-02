@@ -1,0 +1,145 @@
+classDiagram
+    %% ===== LLM Client Layer =====
+    class LLMClient {
+        <<abstract>>
+        #baseUrl string
+        #model string
+        #temperature double
+        +chat(history vector~Message~) Message*
+        +setModel(name string) void*
+        +setTemperature(t double) void*
+    }
+    class OllamaClient {
+        -httpPost(endpoint string, payload json) json
+        +chat(history vector~Message~) Message
+        +setModel(name string) void
+        +setTemperature(t double) void
+    }
+    class Message {
+        <<struct>>
+        +role string
+        +content string
+    }
+    LLMClient <|-- OllamaClient
+    OllamaClient ..> Message : uses
+
+    %% ===== Tool Layer =====
+    class Tool {
+        <<abstract>>
+        +name() string*
+        +description() string*
+        +execute(args string) optional~string~*
+    }
+    class ExecTool
+    class FileTool
+    class WebSearchTool
+    class MemoryTool
+    class CalculatorTool
+    Tool <|-- ExecTool
+    Tool <|-- FileTool
+    Tool <|-- WebSearchTool
+    Tool <|-- MemoryTool
+    Tool <|-- CalculatorTool
+
+    class ToolRegistry {
+        -tools map~string, function~
+        -instances map~string, unique_ptr~Tool~~
+        -denyList set~string~
+        +registerTool(name string, factory function) void
+        +getTool(name string) Tool*
+        +listTools() vector~string~
+        +buildToolDescriptions() string
+        +setDeny(names vector~string~) void
+    }
+    ToolRegistry o-- Tool : manages instances
+
+    %% ===== Skill Layer =====
+    class SkillLoader {
+        -skillsDir path
+        -skills map~string, string~
+        +loadSkills() void
+        +selectSkill(task string) string
+        +buildSystemPrompt(skillName string) string
+    }
+
+    %% ===== Agent Layer =====
+    class LoopDetector {
+        -history deque~string~
+        -warningThreshold int
+        -criticalThreshold int
+        +recordAction(action string) void
+        +checkGenericRepeat() bool
+        +checkPingPong() bool
+    }
+    class AgentLoop {
+        #llmClient LLMClient*
+        #registry ToolRegistry*
+        #skillLoader SkillLoader*
+        #loopDetector LoopDetector
+        #history vector~Message~
+        #stepHook function~void Step~
+        +run(task string, maxSteps int) Trajectory
+        #observe() void
+        #think() Message
+        #act(call ToolCall) string
+        #parseToolCall(response Message) optional~ToolCall~
+    }
+    AgentLoop --> LLMClient : uses
+    AgentLoop --> ToolRegistry : uses
+    AgentLoop --> SkillLoader : uses
+    AgentLoop *-- LoopDetector : composition
+
+    %% ===== Environment Layer =====
+    class Environment {
+        <<abstract>>
+        +setup() void*
+        +teardown() void*
+    }
+    class NativeEnvironment
+    class SandboxEnvironment
+    Environment <|-- NativeEnvironment
+    Environment <|-- SandboxEnvironment
+
+    %% ===== Harness / Evaluation Layer =====
+    class Evaluator {
+        <<abstract>>
+        +evaluate(traj Trajectory, task Task) double*
+    }
+    class KeywordEvaluator
+    class FunctionalEvaluator
+    class VLMEvaluator
+    Evaluator <|-- KeywordEvaluator
+    Evaluator <|-- FunctionalEvaluator
+    Evaluator <|-- VLMEvaluator
+
+    class Step {
+        <<struct>>
+        +step_id int
+        +thought string
+        +action string
+        +tool_result string
+        +tokens_used int
+        +latency_ms int
+    }
+    class Trajectory {
+        +task_id string
+        +model string
+        +success bool
+        +total_tokens int
+        +total_time_ms int
+        +steps vector~Step~
+        +toJson() json
+    }
+    Trajectory *-- Step : contains
+
+    class HarnessRunner {
+        -environment unique_ptr~Environment~
+        -evaluators vector~unique_ptr~Evaluator~~
+        +run(task Task) Trajectory
+        +runBatch(tasks vector~Task~) vector~Trajectory~
+        -onStep(step Step) void
+    }
+    HarnessRunner *-- Environment : owns
+    HarnessRunner o-- Evaluator : uses many
+    HarnessRunner ..> AgentLoop : creates and injects stepHook
+    HarnessRunner ..> Trajectory : produces

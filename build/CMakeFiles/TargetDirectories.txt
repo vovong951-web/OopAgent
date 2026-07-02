@@ -1,3 +1,0 @@
-C:/Users/dell/OopAgent/build/CMakeFiles/OopAgent.dir
-C:/Users/dell/OopAgent/build/CMakeFiles/edit_cache.dir
-C:/Users/dell/OopAgent/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant Main as main.cpp / run_eval.cpp
+    participant HR as HarnessRunner
+    participant ENV as Environment
+    participant AL as AgentLoop
+    participant EV as Evaluator (Keyword/Functional)
+    participant TJ as Trajectory
+    participant FS as File System (JSON export)
+
+    Main->>HR: runBatch(tasks.json)
+    HR->>HR: đọc danh sách task từ tasks.json
+
+    loop với mỗi task trong tasks
+        HR->>ENV: setup()
+        ENV-->>HR: môi trường sẵn sàng
+
+        HR->>AL: tạo AgentLoop mới, inject stepHook = HarnessRunner::onStep
+        HR->>AL: run(task.instruction, task.max_steps)
+
+        loop mỗi bước trong agent loop
+            AL->>AL: think() / act() (như sequence diagram agent run)
+            AL->>HR: stepHook(step)  %% Observer/Hook pattern
+            HR->>TJ: steps.push_back(step)
+        end
+
+        AL-->>HR: trả kết quả cuối cùng
+        HR->>ENV: teardown()
+
+        HR->>EV: evaluate(trajectory, task)
+        EV-->>HR: score / PASS-FAIL
+
+        HR->>TJ: set success, total_tokens, total_time_ms
+        HR->>FS: trajectory.toJson() -> trajectory_{task_id}.json
+    end
+
+    HR->>HR: tính success rate = pass / total
+    HR-->>Main: vector<Trajectory> + success rate

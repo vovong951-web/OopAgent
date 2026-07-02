@@ -21,8 +21,9 @@ void testLoopDetector() {
 
     // Generic Repeat
     LoopDetector detector(3, 5);
-    auto s1 = detector.check(ToolCallAction{"calculator", "1+1"});
+    auto s1 = detector.check(ToolCallAction{"calculator", "1+1"});// ktr và trả về status
     assert(s1 == LoopDetector::Status::Ok);
+    // nếu không phải ok thì crash
     std::cout << "Buoc 1: Ok\n";
 
     auto s2 = detector.check(ToolCallAction{"calculator", "1+1"});
@@ -120,13 +121,16 @@ KHONG viet them bat ky text nao ngoai JSON.
         std::cout << "Loi: " << e.what() << "\n";
         std::cout << "===== AGENT LOOP: FAIL (exception) =====\n";
         return;
-    }    std::cout << "\nKet qua cuoi: " << answer << "\n";
+    }    
+    std::cout << "\nKet qua cuoi: " << answer << "\n";
 
     // Verify file result.txt
     if (std::filesystem::exists("result.txt")) {
         std::ifstream f("result.txt");
-        std::string content((std::istreambuf_iterator<char>(f)),
-                             std::istreambuf_iterator<char>());
+        std::string content((std::istreambuf_iterator<char>(f)), // đầu file
+                             std::istreambuf_iterator<char>());  // cuối file
+    // Đọc tất cả ký tự từ đầu file đến cuối file rồi lưu vào content.
+    // string(InputIt first, InputIt last);
         std::cout << "result.txt noi dung: " << content << "\n";
         if (content.find("255") != std::string::npos) {
             std::cout << "===== AGENT LOOP: PASS =====\n";

@@ -1,0 +1,71 @@
+flowchart TB
+    subgraph MAIN["main.cpp / benchmark/run_eval.cpp"]
+        M[Entry point]
+    end
+
+    subgraph CLIENT["src/client"]
+        LC[LLMClient abstract]
+        OC[OllamaClient]
+        LC --> OC
+    end
+
+    subgraph TOOLS["src/tools"]
+        TL[Tool abstract]
+        TR[ToolRegistry]
+        CT[CalculatorTool]
+        FT[FileTool]
+        ET[ExecTool]
+        WT[WebSearchTool]
+        MT[MemoryTool]
+        TL --> CT
+        TL --> FT
+        TL --> ET
+        TL --> WT
+        TL --> MT
+        TR --> TL
+    end
+
+    subgraph AGENT["src/agent"]
+        SL[SkillLoader]
+        LD[LoopDetector]
+        AL[AgentLoop]
+        AL --> SL
+        AL --> LD
+    end
+
+    subgraph SKILLS["skills/*.md"]
+        SK[task_planner.md / error_recovery.md / code_helper.md]
+    end
+
+    subgraph HARNESS["src/harness"]
+        HR[HarnessRunner]
+        ENV[Environment abstract]
+        EVA[Evaluator abstract]
+        TJ[Trajectory + Step]
+        HR --> ENV
+        HR --> EVA
+        HR --> TJ
+    end
+
+    subgraph BENCH["benchmark/tasks.json"]
+        TJS[Task definitions]
+    end
+
+    subgraph DOCS["docs/*.json"]
+        OUT[trajectory_*.json output]
+    end
+
+    M --> AL
+    M --> HR
+
+    AL --> OC
+    AL --> TR
+    SL --> SK
+
+    HR --> AL
+    HR --> TJS
+    HR --> OUT
+
+    %% Ghi chú: mũi tên thể hiện chiều phụ thuộc (dependency)
+    %% AgentLoop KHÔNG phụ thuộc ngược vào HarnessRunner
+    %% (chỉ expose stepHook qua std::function, xem sequence_diagram_harness)

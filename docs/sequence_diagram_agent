@@ -1,0 +1,41 @@
+sequenceDiagram
+    participant Main as main.cpp
+    participant AL as AgentLoop
+    participant SL as SkillLoader
+    participant LLM as LLMClient (Ollama)
+    participant TR as ToolRegistry
+    participant T as Tool (vd CalculatorTool)
+    participant LD as LoopDetector
+
+    Main->>AL: run(task, maxSteps)
+    AL->>SL: selectSkill(task)
+    SL-->>AL: skillName
+    AL->>SL: buildSystemPrompt(skillName)
+    SL-->>AL: systemPrompt
+    AL->>AL: history.push_back(systemPrompt, task)
+
+    loop cho đến khi Done hoặc đạt maxSteps
+        AL->>AL: observe()
+        AL->>LLM: chat(history)
+        LLM-->>AL: response (Message)
+        AL->>AL: parseToolCall(response)
+
+        alt response chứa tool_call
+            AL->>TR: getTool(name)
+            TR-->>AL: Tool*
+            AL->>T: execute(args)
+            T-->>AL: optional<string> result
+            AL->>LD: recordAction(action)
+            LD->>LD: checkGenericRepeat() / checkPingPong()
+            alt loop critical phát hiện
+                LD-->>AL: critical=true
+                AL->>AL: log cảnh báo, dừng vòng lặp
+            else bình thường
+                AL->>AL: history.push_back(tool_result)
+            end
+        else response là Done
+            AL->>AL: break loop
+        end
+    end
+
+    AL-->>Main: kết quả cuối cùng (final answer)
