@@ -7,13 +7,11 @@
 // bien writeArgs trong testFileToolIntegration() cho khop.
 
 #include <iostream>
-#include <cassert>
 #include <optional>
 #include <string>
 #include <filesystem>
 #include <fstream>
 #include <memory>
-
 #include "tools/tool_registry.h"
 #include "tools/calculator_tool.h"
 #include "tools/file_tool.h"
@@ -84,6 +82,7 @@ bool testFileToolIntegration(ToolRegistry& registry) {
 
     if (line != testContent) {
         std::cerr << "  FAIL: noi dung file sai, mong doi '" << testContent
+        // cerr trong iostream dùng để in ra lỗi
                    << "', nhan duoc '" << line << "'\n";
         fs::remove(testPath);
         return false;

@@ -13,6 +13,9 @@
 #include <cassert>       // ← THÊM
 #include <filesystem>    // ← THÊM
 #include <fstream>       // ← THÊM
+#include "harness/harness_runner.h"
+#include "harness/keyword_evaluator.h"
+#include "harness/functional_evaluator.h"
 // =============================================
 // TEST 1: LoopDetector (không cần Ollama)
 // =============================================
@@ -102,14 +105,12 @@ KHONG viet them bat ky text nao ngoai JSON.
     AgentLoop agent(client, registry, systemPrompt);
 
     // Hook in từng bước ra console
-    agent.setStepHook([](int step, const std::string& thought,
-                          const Action&,
-                          const std::optional<std::string>& result,
-                          long long ms) {
-        std::cout << "\n[Step " << step << "] (" << ms << "ms)\n";
-        std::cout << "LLM: " << thought << "\n";
-        std::cout << "Ket qua: " << result.value_or("(none)") << "\n";
-    });
+    agent.setStepHook([](const Step& s) {
+    std::cout << "\n[Step " << s.step_id << "] (" << s.latency_ms << "ms)\n";
+    std::cout << "LLM: "     << s.thought     << "\n";
+    std::cout << "Action: "  << s.action      << "\n";
+    std::cout << "Ket qua: " << s.tool_result << "\n";
+});
 
     std::string task = "Tinh 15*17 va luu ket qua vao file result.txt";
     std::cout << "Task: " << task << "\n";
@@ -141,7 +142,45 @@ KHONG viet them bat ky text nao ngoai JSON.
         std::cout << "===== AGENT LOOP: FAIL (result.txt khong ton tai) =====\n";
     }
 }
+void testHarness() {
+    std::cout << "\n===== TEST HARNESS =====\n";
 
+    OllamaClient client("https://your-ngrok-url", "gemma4:e4b");
+    ToolRegistry registry;
+    registry.registerTool("calculator", [] {
+        return std::make_unique<CalculatorTool>();
+    });
+    registry.registerTool("file", [] {
+        return std::make_unique<FileTool>();
+    });
+
+    std::string systemPrompt = R"(
+Ban la mot AI agent. Khi can tool tra ve JSON:
+{"tool": "ten_tool", "args": "tham_so"}
+Khi xong tra ve: {"final_answer": "ket qua"}
+KHONG viet gi ngoai JSON.
+)";
+
+    AgentLoop agent(client, registry, systemPrompt, "gemma4:e4b");
+
+    // Dùng KeywordEvaluator
+    Task task;
+    task.id          = "task_001";
+    task.description = "Tinh 15*17";
+    task.instruction = "Tinh 15 nhan 17, tra ve ket qua";
+    task.eval_type   = "keyword";
+    task.eval_config = "255";   // keyword cần tìm trong output
+    task.max_steps   = 10;
+
+    HarnessRunner harness(std::make_unique<KeywordEvaluator>());
+    Trajectory traj = harness.run(agent, task);
+
+    std::cout << "Success: " << (traj.success ? "PASS" : "FAIL") << "\n";
+    std::cout << "Steps: "   << traj.steps.size() << "\n";
+    std::cout << "Time: "    << traj.total_time_ms << "ms\n";
+
+    std::cout << "===== HARNESS: DONE =====\n";
+}
 
 int main() {
     SetConsoleOutputCP(CP_UTF8);     // MỚI - sửa lỗi hiển thị tiếng Việt trong console
@@ -210,6 +249,6 @@ int main() {
     
     testLoopDetector();   // test tuần 4 - không cần Ollama
     testAgentLoop();      // test tuần 4 - cần Ollama đang chạy
-
+    testHarness();
     return 0;
 }
