@@ -102,6 +102,7 @@ std::string OllamaClient::httpPost(const std::string &url, const std::string &bo
 
     struct curl_slist *headers = nullptr;                                   // struct curl_slist* kiểu cũ của c++ khi gọi struct
     headers = curl_slist_append(headers, "Content-Type: application/json"); // thêm các e header với nội dung
+    headers = curl_slist_append(headers, "ngrok-skip-browser-warning: true"); // ← THÊM
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     /*
     curl_easy_setopt(

@@ -42,3 +42,19 @@ target_include_directories(integration_test PRIVATE src)
 target_link_libraries(integration_test PRIVATE
     nlohmann_json::nlohmann_json
 )
+# Thêm target run_eval
+add_executable(run_eval
+    benchmark/run_eval.cpp
+    src/client/ollama_client.cpp
+    src/tools/tool_registry.cpp
+    src/tools/calculator_tool.cpp
+    src/tools/file_tool.cpp
+    src/tools/exec_tool.cpp
+    src/tools/web_search_tool.cpp
+    src/tools/memory_tool.cpp
+    src/agent/agent_loop.cpp
+    src/agent/loop_detector.cpp
+    src/agent/skill_loader.cpp
+)
+target_link_libraries(run_eval PRIVATE curl nlohmann_json::nlohmann_json sqlite3)
+target_include_directories(run_eval PRIVATE src)

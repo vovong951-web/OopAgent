@@ -5,12 +5,14 @@
 #include <functional>
 #include <fstream>
 #include <chrono>
-#include <iostream>       // std::cout
-#include <filesystem>     // std::filesystem::create_directories
-#include <ranges>         // C++20
+#include <iostream>
+#include <filesystem>
+#include <ranges>
 #include <nlohmann/json.hpp>
-#include "trajectory.h"   // đã include step.h bên trong
+#include "trajectory.h"
 #include "evaluator.h"
+#include "keyword_evaluator.h"
+#include "functional_evaluator.h"
 #include "../agent/agent_loop.h"
 
 class HarnessRunner {
@@ -31,12 +33,11 @@ public:
         StepHook hook = [&traj](const Step& step) {
             traj.addStep(step);
         };
-
         agent.setStepHook(hook);
 
         auto start = std::chrono::high_resolution_clock::now();
         std::string final_answer = agent.run(task.instruction, task.max_steps);
-        auto end = std::chrono::high_resolution_clock::now();
+        auto end   = std::chrono::high_resolution_clock::now();
 
         traj.total_time_ms = std::chrono::duration_cast<std::chrono::milliseconds>
                              (end - start).count();
@@ -70,12 +71,32 @@ public:
             tasks.push_back(std::move(t));
         }
 
+        // C++20 ranges: in danh sách task hard trước khi chạy
+        auto hard_view = tasks
+            | std::views::filter([](const Task& t) { return t.max_steps > 10; })
+            | std::views::transform([](const Task& t) { return t.id; });
+
+        std::cout << "Hard tasks scheduled:\n";
+        for (const auto& id : hard_view) {
+            std::cout << "  [HARD] " << id << "\n";
+        }
+
         int pass_count = 0;
         std::vector<nlohmann::json> batch_results;
 
         for (const auto& task : tasks) {
-            std::cout << "--- Running task: " << task.id << " ---\n";
-            Trajectory traj = run(agent, task);
+            std::cout << "\n--- Running task: " << task.id
+                      << " [" << task.eval_type << "] ---\n";
+
+            // Chọn evaluator phù hợp theo eval_type của từng task
+            std::unique_ptr<Evaluator> taskEval;
+            if (task.eval_type == "functional") {
+                taskEval = std::make_unique<FunctionalEvaluator>();
+            } else {
+                taskEval = std::make_unique<KeywordEvaluator>();
+            }
+            HarnessRunner taskRunner(std::move(taskEval));
+            Trajectory traj = taskRunner.run(agent, task);
 
             if (traj.success) ++pass_count;
 
@@ -102,7 +123,6 @@ private:
 
     void setupEnvironment(const Task& task) {
         std::filesystem::create_directories("benchmark");
-        // ← thay std::println bằng std::cout
         std::cout << "[Harness] Setup environment for task: " << task.id << "\n";
     }
 
@@ -118,7 +138,6 @@ private:
 
         std::ofstream ofs("benchmark/batch_summary.json");
         ofs << summary.dump(2);
-        // ← thay std::println bằng std::cout
         std::cout << "[Harness] Exported benchmark/batch_summary.json\n";
     }
 };

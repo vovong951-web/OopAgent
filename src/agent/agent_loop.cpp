@@ -81,14 +81,23 @@ std::string AgentLoop::think() {
 Action AgentLoop::parseToolCall(const std::string& llmResponse) {
     m_history.push_back({"assistant", llmResponse});
 
-    static const std::regex jsonBlock(R"(\{[\s\S]*\})");
-    std::smatch match;
-    if (!std::regex_search(llmResponse, match, jsonBlock)) {
+    // Tìm TẤT CẢ JSON blocks, lấy cái cuối cùng
+    static const std::regex jsonBlock(R"(\{[^{}]*\})");
+    
+    std::string lastMatch;
+    auto begin = std::sregex_iterator(llmResponse.begin(), llmResponse.end(), jsonBlock);
+    auto end   = std::sregex_iterator();
+    
+    for (auto it = begin; it != end; ++it) {
+        lastMatch = it->str(); // lấy match cuối cùng
+    }
+
+    if (lastMatch.empty()) {
         return ErrorAction{"Không tìm thấy JSON tool call trong response."};
     }
 
     try {
-        auto j = nlohmann::json::parse(match.str());
+        auto j = nlohmann::json::parse(lastMatch);
         if (j.contains("final_answer")) {
             return DoneAction{j.at("final_answer").get<std::string>()};
         }

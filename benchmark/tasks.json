@@ -1,0 +1,82 @@
+[
+  {
+    "id": "task_001",
+    "description": "Tính 15 * 17",
+    "instruction": "Tinh 15 nhan 17. Tra ve ket qua dang so nguyen.",
+    "eval_type": "keyword",
+    "eval_config": "255",
+    "max_steps": 5
+  },
+  {
+    "id": "task_002",
+    "description": "Ghi số vào file",
+    "instruction": "Ghi chuoi 'Hello OopAgent' vao file hello.txt",
+    "eval_type": "functional",
+    "eval_config": "test -f hello.txt && grep 'Hello OopAgent' hello.txt",
+    "max_steps": 5
+  },
+  {
+    "id": "task_003",
+    "description": "Tính căn bậc hai",
+    "instruction": "Tinh ket qua cua 144 / 12",
+    "eval_type": "keyword",
+    "eval_config": "12",
+    "max_steps": 5
+  },
+  {
+    "id": "task_004",
+    "description": "Đọc file vừa ghi",
+    "instruction": "Doc noi dung file hello.txt va tra ve noi dung do",
+    "eval_type": "keyword",
+    "eval_config": "Hello OopAgent",
+    "max_steps": 5
+  },
+  {
+    "id": "task_005",
+    "description": "Tính rồi lưu file",
+    "instruction": "Tinh 25 * 4 va luu ket qua vao file calc_result.txt",
+    "eval_type": "functional",
+    "eval_config": "test -f calc_result.txt && grep '100' calc_result.txt",
+    "max_steps": 8
+  },
+  {
+    "id": "task_006",
+    "description": "Lưu memory rồi tìm lại",
+    "instruction": "Luu vao memory: 'project_name' = 'OopAgent2026'. Sau do tim lai gia tri cua 'project_name'.",
+    "eval_type": "keyword",
+    "eval_config": "OopAgent2026",
+    "max_steps": 8
+  },
+  {
+    "id": "task_007",
+    "description": "Tính nhiều bước",
+    "instruction": "Tinh (10 + 5) * 3 roi tru di 5. Luu ket qua cuoi vao file final.txt",
+    "eval_type": "functional",
+    "eval_config": "test -f final.txt && grep '40' final.txt",
+    "max_steps": 8
+  },
+  {
+    "id": "task_008",
+    "description": "Tìm kiếm web",
+    "instruction": "Tim kiem thong tin ve 'C++ programming language' va tom tat ket qua tim duoc.",
+    "eval_type": "keyword",
+    "eval_config": "C++",
+    "max_steps": 8
+  },
+  {
+    "id": "task_009",
+    "description": "Multi-step: tính + lưu + đọc lại",
+    "instruction": "Tinh 99 * 99. Luu ket qua vao file result99.txt. Doc lai file do va xac nhan ket qua dung.",
+    "eval_type": "functional",
+    "eval_config": "test -f result99.txt && grep '9801' result99.txt",
+    "max_steps": 12
+  },
+  {
+    "id": "task_010",
+    "description": "Multi-step: memory + tính + file",
+    "instruction": "Luu so '42' vao memory voi key 'magic_number'. Tinh magic_number nhan 10. Luu ket qua 420 vao file magic.txt.",
+    "eval_type": "functional",
+    "eval_config": "test -f magic.txt && grep '420' magic.txt",
+    "max_steps": 15
+  }
+]
