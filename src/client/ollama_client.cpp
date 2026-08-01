@@ -15,7 +15,7 @@ Hello World
 
 Curl cần biết:
 
-"Tôi nhận được dữ liệu rồi, giờ ghi nó vào đâu?"
+"Tôi nhận được dữ liệu rồi, giờ ghi nó vào đâu?"  
 
 Nó sẽ gọi hàm writeCallback() của bạn.
 
@@ -98,7 +98,7 @@ std::string OllamaClient::httpPost(const std::string &url, const std::string &bo
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
     // Khi có dữ liệu trả về:
     // gọi writeCallback(...)
-    // và cho nó biết phải ghi vào response
+    // và cho nó biết phải ghi vào response 
 
     struct curl_slist *headers = nullptr;                                   // struct curl_slist* kiểu cũ của c++ khi gọi struct
     headers = curl_slist_append(headers, "Content-Type: application/json"); // thêm các e header với nội dung

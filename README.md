@@ -1,6 +1,6 @@
 # OopAgent — AI Agent Framework với Ollama API
 
-**Sinh viên:** Vo Van Vong — MSSV: 25127251  
+**Sinh viên:** Võ Văn Vọng — MSSV: 25127251  
 **Môn:** Lập trình Hướng Đối Tượng — Năm 2026
 
 ---

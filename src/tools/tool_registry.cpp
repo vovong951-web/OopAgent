@@ -33,8 +33,11 @@ std::vector<std::string> ToolRegistry::listTools() const {
 std::string ToolRegistry::buildToolDescriptions() {
     std::string result;
     for (const auto& [name, factory] : m_factories) {
-        auto tool = factory();
-        result += "- " + tool->name() + ": " + tool->description() + "\n";
+        // Chỉ tạo mô tả cho những tool KHÔNG bị deny
+        if (std::find(m_denyList.begin(), m_denyList.end(), name) == m_denyList.end()) {
+            auto tool = factory();
+            result += "- " + tool->name() + ": " + tool->description() + "\n";
+        }
     }
     return result;
 }
