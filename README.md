@@ -50,8 +50,8 @@ Output chạy lần lượt:
 ## Chạy benchmark 10 task
 
     cp /c/Users/dell/OopAgent/benchmark/tasks.json /c/Users/dell/OopAgent/build/
-    cd build
-    ./OopAgent.exe
+    cd /c/Users/dell/OopAgent/build
+    ./run_eval.exe
     cat benchmark/batch_summary.json
 
 ---
