@@ -27,8 +27,9 @@
 2. Nhấn **Chạy tất cả** — chờ 10-15 phút
 3. Lấy URL ngrok từ output:
        * ngrok tunnel https://xxx.ngrok-free.dev -> http://127.0.0.1:11434
-4. Mở src/main.cpp, sửa dòng:
-       const std::string OLLAMA_URL = "https://xxx.ngrok-free.dev";
+4. Sửa URL ngrok ở **2 chỗ**:
+   - src/main.cpp        dòng có OLLAMA_URL
+   - benchmark/run_eval.cpp  dòng 18 trong OllamaClient client(...)
 5. Build lại: cmake --build build
 
 ---
